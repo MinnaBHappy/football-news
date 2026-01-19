@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football News</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            min-height: 100vh;
+            background-color: #1a1a2e;
+            color: #fff;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Goal Net Background */
+        .goal-net-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.9) 100%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="net" patternUnits="userSpaceOnUse" width="20" height="20"><path d="M0 0 L20 20 M20 0 L0 20" stroke="rgba(255,255,255,0.15)" stroke-width="0.5" fill="none"/><rect x="0" y="0" width="20" height="20" stroke="rgba(255,255,255,0.1)" stroke-width="0.3" fill="none"/></pattern></defs><rect width="100" height="100" fill="url(%23net)"/></svg>');
+            background-size: cover, 150px 150px;
+        }
+
+        /* Goal Post Effect */
+        .goal-post {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .goal-post::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 5%;
+            width: 8px;
+            height: 100%;
+            background: linear-gradient(90deg, #f0f0f0, #d0d0d0, #f0f0f0);
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+
+        .goal-post::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 5%;
+            width: 8px;
+            height: 100%;
+            background: linear-gradient(90deg, #f0f0f0, #d0d0d0, #f0f0f0);
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+
+        .crossbar {
+            position: fixed;
+            top: 60px;
+            left: 5%;
+            right: 5%;
+            height: 10px;
+            background: linear-gradient(180deg, #f0f0f0, #d0d0d0, #f0f0f0);
+            border-radius: 5px;
+            z-index: -1;
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 900;
+            color: #4ade80;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: #fff;
+        }
+
+        /* Date Picker */
+        .date-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .date-picker-container:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .date-picker-container input[type="date"] {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 14px;
+            font-family: 'Roboto', sans-serif;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .date-picker-container input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        .date-icon {
+            font-size: 18px;
+        }
+
+        /* Hamburger Menu */
+        .hamburger-menu {
+            position: relative;
+        }
+
+        .hamburger-btn {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .hamburger-btn span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: #fff;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            width: 280px;
+            background: rgba(30, 30, 50, 0.98);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+        }
+
+        .menu-dropdown.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .menu-title {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 10px;
+            padding-left: 10px;
+        }
+
+        .league-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .league-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .league-item.active {
+            background: rgba(74, 222, 128, 0.2);
+            border-left: 3px solid #4ade80;
+        }
+
+        .league-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #4ade80;
+            cursor: pointer;
+        }
+
+        .league-flag {
+            font-size: 20px;
+        }
+
+        .league-name {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .add-league-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background: rgba(74, 222, 128, 0.2);
+            border: 2px dashed #4ade80;
+            border-radius: 10px;
+            color: #4ade80;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-league-btn:hover {
+            background: rgba(74, 222, 128, 0.3);
+        }
+
+        /* Add League Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: rgba(30, 30, 50, 0.98);
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .additional-leagues {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .additional-league-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .additional-league-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .additional-league-item.selected {
+            background: rgba(74, 222, 128, 0.2);
+            border: 1px solid #4ade80;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .selected-leagues-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .league-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        /* News Grid */
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(2, minmax(200px, auto));
+            gap: 20px;
+            min-height: 500px;
+        }
+
+        .news-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        /* Hottest news - takes half space (2 columns, 2 rows) */
+        .news-card.hot-1 {
+            grid-column: span 2;
+            grid-row: span 2;
+        }
+
+        /* Second hottest - takes quarter space (2 columns, 1 row) */
+        .news-card.hot-2 {
+            grid-column: span 2;
+            grid-row: span 1;
+        }
+
+        /* Other news - smaller */
+        .news-card.hot-3,
+        .news-card.hot-4,
+        .news-card.hot-5 {
+            grid-column: span 1;
+            grid-row: span 1;
+        }
+
+        .news-image {
+            width: 100%;
+            height: 60%;
+            min-height: 120px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+        }
+
+        .news-card.hot-1 .news-image {
+            height: 65%;
+        }
+
+        .news-content {
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .news-category {
+            display: inline-block;
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            width: fit-content;
+        }
+
+        .news-title {
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .news-card.hot-1 .news-title {
+            font-size: 22px;
+            -webkit-line-clamp: 3;
+        }
+
+        .news-card.hot-2 .news-title {
+            font-size: 18px;
+        }
+
+        .news-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: auto;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .news-views {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .hot-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: #fff;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* News Detail Modal */
+        .news-detail-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            padding: 20px;
+        }
+
+        .news-detail-modal.active {
+            display: flex;
+        }
+
+        .news-detail-content {
+            background: rgba(30, 30, 50, 0.98);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .news-detail-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+        }
+
+        .news-detail-body {
+            padding: 30px;
+        }
+
+        .news-detail-category {
+            display: inline-block;
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .news-detail-title {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 15px;
+        }
+
+        .news-detail-meta {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .news-detail-text {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #ddd;
+            margin-bottom: 30px;
+        }
+
+        .news-references {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px 20px;
+            border-radius: 10px;
+            border-left: 3px solid #4ade80;
+        }
+
+        .news-references-title {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .news-references-list {
+            font-size: 13px;
+            color: #aaa;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .news-detail-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .news-detail-close:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        /* Meatball Menu */
+        .meatball-menu {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+        }
+
+        .meatball-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            width: 50px;
+            height: 50px;
+            background: rgba(74, 222, 128, 0.9);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(74, 222, 128, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .meatball-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(74, 222, 128, 0.5);
+        }
+
+        .meatball-btn span {
+            display: block;
+            width: 6px;
+            height: 6px;
+            background: #1a1a2e;
+            border-radius: 50%;
+        }
+
+        .meatball-dropdown {
+            position: absolute;
+            bottom: 60px;
+            right: 0;
+            width: 220px;
+            background: rgba(30, 30, 50, 0.98);
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        .meatball-dropdown.active {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .meatball-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .meatball-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .meatball-item-icon {
+            font-size: 16px;
+        }
+
+        /* Language Selector */
+        .language-selector {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 100;
+        }
+
+        .language-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            padding: 12px 18px;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .language-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .language-dropdown {
+            position: absolute;
+            bottom: 55px;
+            left: 0;
+            width: 200px;
+            background: rgba(30, 30, 50, 0.98);
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .language-dropdown.active {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        .language-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .language-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .language-item.active {
+            background: rgba(74, 222, 128, 0.2);
+        }
+
+        .language-flag {
+            font-size: 18px;
+        }
+
+        .language-name {
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .news-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .news-card.hot-1 {
+                grid-column: span 2;
+                grid-row: span 1;
+            }
+            
+            .news-card.hot-2 {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .logo {
+                font-size: 20px;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .news-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .news-card.hot-1,
+            .news-card.hot-2 {
+                grid-column: span 1;
+                grid-row: span 1;
+            }
+            
+            .news-detail-title {
+                font-size: 22px;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #4ade80;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Goal Net Background -->
+    <div class="goal-net-background"></div>
+    <div class="goal-post"></div>
+    <div class="crossbar"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">⚽ Football <span>News</span></div>
+            <div class="date-picker-container">
+                <span class="date-icon">📅</span>
+                <input type="date" id="datePicker" />
+            </div>
+        </div>
+        
+        <div class="hamburger-menu">
+            <button class="hamburger-btn" id="hamburgerBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="menu-dropdown" id="menuDropdown">
+                <div class="menu-title" data-i18n="selectLeagues">Select Leagues</div>
+                <div id="leaguesList"></div>
+                <button class="add-league-btn" id="addLeagueBtn">
+                    <span>➕</span>
+                    <span data-i18n="addMoreLeagues">Add More Leagues</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="selected-leagues-info" id="selectedLeaguesInfo"></div>
+        <div class="news-grid" id="newsGrid">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <button class="language-btn" id="languageBtn">
+            <span id="currentLangFlag">🇬🇧</span>
+            <span id="currentLangName">English</span>
+            <span>▼</span>
+        </button>
+        <div class="language-dropdown" id="languageDropdown"></div>
+    </div>
+
+    <!-- Meatball Menu -->
+    <div class="meatball-menu">
+        <button class="meatball-btn" id="meatballBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="meatball-dropdown" id="meatballDropdown">
+            <div class="meatball-item" data-action="refresh">
+                <span class="meatball-item-icon">🔄</span>
+                <span data-i18n="refreshNews">Refresh News</span>
+            </div>
+            <div class="meatball-item" data-action="trending">
+                <span class="meatball-item-icon">🔥</span>
+                <span data-i18n="trendingNow">Trending Now</span>
+            </div>
+            <div class="meatball-item" data-action="latest">
+                <span class="meatball-item-icon">🕐</span>
+                <span data-i18n="latestNews">Latest News</span>
+            </div>
+            <div class="meatball-item" data-action="more">
+                <span class="meatball-item-icon">📰</span>
+                <span data-i18n="moreNews">More News</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add League Modal -->
+    <div class="modal-overlay" id="addLeagueModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" data-i18n="addLeagues">Add Leagues</h3>
+                <button class="modal-close" id="modalClose">×</button>
+            </div>
+            <div class="additional-leagues" id="additionalLeagues"></div>
+        </div>
+    </div>
+
+    <!-- News Detail Modal -->
+    <div class="news-detail-modal" id="newsDetailModal">
+        <div class="news-detail-content">
+            <button class="news-detail-close" id="newsDetailClose">×</button>
+            <div class="news-detail-image" id="newsDetailImage"></div>
+            <div class="news-detail-body">
+                <span class="news-detail-category" id="newsDetailCategory"></span>
+                <h2 class="news-detail-title" id="newsDetailTitle"></h2>
+                <div class="news-detail-meta">
+                    <span id="newsDetailDate"></span>
+                    <span id="newsDetailViews"></span>
+                    <span id="newsDetailLeague"></span>
+                </div>
+                <p class="news-detail-text" id="newsDetailText"></p>
+                <div class="news-references">
+                    <div class="news-references-title" data-i18n="references">References</div>
+                    <div class="news-references-list" id="newsDetailReferences"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
