@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Football News</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="top-bar">
+        <div class="date-control">
+          <label for="news-date">Date</label>
+          <input id="news-date" type="date" />
+          <span id="news-date-label" class="date-label"></span>
+        </div>
+
+        <div class="title-block">
+          <h1>Football News</h1>
+          <p>Major league headlines tuned to the day you select.</p>
+        </div>
+
+        <button
+          id="menuButton"
+          class="icon-button menu-button"
+          type="button"
+          aria-label="Open league menu"
+          aria-expanded="false"
+        >
+          <span class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </button>
+      </header>
+
+      <main class="content">
+        <section class="news-section">
+          <div class="section-header">
+            <div>
+              <h2>Top stories</h2>
+              <p class="section-subtitle">
+                Popularity is ranked by views and cross publisher coverage.
+              </p>
+            </div>
+            <div class="legend">
+              <span class="legend-item">Hot</span>
+              <span class="legend-item">Rising</span>
+              <span class="legend-item">Spotlight</span>
+            </div>
+          </div>
+          <div id="newsGrid" class="news-grid"></div>
+        </section>
+      </main>
+
+      <div class="floating-controls">
+        <div class="language-control">
+          <button id="languageButton" class="pill-button" type="button">
+            Language: English
+          </button>
+          <div id="languageMenu" class="dropdown">
+            <button type="button" data-lang="English">English</button>
+            <button type="button" data-lang="Korean">Korean</button>
+            <button type="button" data-lang="Japanese">Japanese</button>
+            <button type="button" data-lang="Mandarin">Mandarin</button>
+            <button type="button" data-lang="French">French</button>
+            <button type="button" data-lang="Italian">Italian</button>
+            <button type="button" data-lang="German">German</button>
+            <button type="button" data-lang="Spanish">Spanish</button>
+          </div>
+        </div>
+
+        <div class="more-control">
+          <button
+            id="moreButton"
+            class="icon-button meatball-button"
+            type="button"
+            aria-label="More news"
+            aria-expanded="false"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <div id="moreMenu" class="dropdown more-menu">
+            <strong>More headlines</strong>
+            <ul id="moreNewsList"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="panelBackdrop" class="panel-backdrop" aria-hidden="true"></div>
+
+    <aside id="leaguePanel" class="league-panel" aria-hidden="true">
+      <div class="panel-header">
+        <h3>Leagues</h3>
+        <button id="closePanel" class="text-button" type="button">Close</button>
+      </div>
+      <p class="panel-subtitle">
+        Toggle the leagues you want in the news grid.
+      </p>
+      <div id="leagueList" class="league-list"></div>
+
+      <div class="panel-footer">
+        <div class="add-league">
+          <button id="addLeagueButton" class="pill-button" type="button">
+            + Add league
+          </button>
+          <div id="addLeagueMenu" class="dropdown add-league-menu"></div>
+        </div>
+      </div>
+    </aside>
+
+    <div id="newsModal" class="modal" aria-hidden="true">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <p id="modalLeague" class="modal-league"></p>
+            <h3 id="modalTitle"></h3>
+          </div>
+          <button id="closeModal" class="text-button" type="button">Close</button>
+        </div>
+        <p id="modalSummary" class="modal-summary"></p>
+        <div class="modal-meta">
+          <span id="modalViews"></span>
+          <span id="modalCoverage"></span>
+        </div>
+        <p id="modalDetail" class="modal-detail"></p>
+        <div class="modal-references">
+          <strong>References</strong>
+          <p id="modalReferences"></p>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
